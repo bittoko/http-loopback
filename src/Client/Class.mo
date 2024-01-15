@@ -11,13 +11,11 @@ import H "HTTP";
 
 module {
 
-  type ReturnFee = Fees.Return;
-
   func process_http_response(res: H.HttpResponsePayload) : T.Response {
     if ( res.status >= 500 ) return #err(#server_error);
     if ( res.status >= 400 ) return #err(#malformed_request);
     switch( res.status ){
-      case( 202 ) #ok("");
+      case( 202 ) #ok( res.body );
       case( 200 ){
         let content = Content([]);
         switch( content.import_cbor( res.body ) ){
@@ -55,9 +53,9 @@ module {
 
     public func get_domain(): Text = state.client_domain;
 
-    public func get_fee(k: Text): ReturnFee = fees.get(k);
+    public func get_fee(k: Text): T.ReturnFee = fees.get(k);
 
-    public func calculate_fee(request_bytes: Nat64, response_bytes: ?Nat64): ReturnFee {
+    public func calculate_fee(request_bytes: Nat64, response_bytes: ?Nat64): T.ReturnFee {
       let max_response = getOpt<Nat64>(response_bytes, C.DEFAULT_MAX_RESPONSE_BYTES);
       let #ok(base_fee) = fees.get(C.FEE_KEY_PER_CALL) else { return #err(#fee_not_defined(C.FEE_KEY_PER_CALL)) };
       let #ok(request_fee) = fees.multiply(C.FEE_KEY_PER_REQUEST_BYTE, request_bytes) else { return #err(#fee_not_defined(C.FEE_KEY_PER_REQUEST_BYTE)) };
@@ -79,7 +77,7 @@ module {
               url = state.client_domain # state.client_path # request.canister_id # "/query";
               headers = [
                 { name = "Content-Type"; value = "application/cbor" },
-                { name = "Idempotency-Key"; value = nonce_factory.next() }
+                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
               ]
             })
           )
@@ -101,7 +99,7 @@ module {
               url = state.client_domain # state.client_path # request.canister_id # "/call";
               headers = [
                 { name = "Content-Type"; value = "application/cbor" },
-                { name = "Idempotency-Key"; value = nonce_factory.next() }
+                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
               ]
             })
           )

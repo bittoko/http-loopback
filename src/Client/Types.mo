@@ -4,13 +4,13 @@ module {
 
   public type URL = Text;
 
-  public type Candid = Blob;
+  public type Response = { #ok: [Nat8]; #err: Error };
 
-  public type Response = { #ok: Blob; #err: Error };
+  public type ReturnFee = Fees.Return;
 
   public type Error = {
     #sys_fatal: Text;
-    #malformed_request: Text;
+    #malformed_request;
     #destination_invalid: Text;
     #sys_transient: Text;
     #canister_reject: Text;

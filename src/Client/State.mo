@@ -1,5 +1,6 @@
 import { Fees; Nonce } "../../../utilities/src";
 import { Identity } "../../../ECDSA/src";
+import { get = getOpt } "mo:base/Option";
 
 
 module {
@@ -11,13 +12,18 @@ module {
     var client_fees: Fees.State;
   };
 
-  public type InitParams = {fees: [(Text, Fees.Fee)]; domain: Text; path: Text};
+  public type InitParams = {
+    nonce: Nonce.State;
+    fees: Fees.State;
+    domain: Text;
+    path: Text;
+  };
 
   public func init(params: InitParams): State = {
     var client_path = params.path;
     var client_domain = params.domain;
-    var client_nonce = Nonce.State.init();
-    var client_fees = Fees.State.init(params.fees);
+    var client_nonce = params.nonce;
+    var client_fees = params.fees;
   };
 
 };
