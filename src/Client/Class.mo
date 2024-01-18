@@ -107,6 +107,27 @@ module {
       }
     };
 
+    public func read_state_endpoint(request: T.Request): async* T.Response {
+      switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
+        case( #err msg ) #err(msg);
+        case( #ok fee ){
+          addCycles( nat64ToNat(fee) );
+          process_http_response(
+            await ic.http_request({
+              method = #post;
+              body = ?request.data;
+              transform = null;
+              max_response_bytes = request.max_response_bytes;
+              url = state.client_domain # state.client_path # request.canister_id # "/read_state";
+              headers = [
+                { name = "Content-Type"; value = "application/cbor" },
+                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
+              ]
+            })
+          )
+        }
+      }
+    };
   };
 
 };

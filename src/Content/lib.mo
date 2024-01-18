@@ -1,6 +1,7 @@
 import C "class";
 import V "value";
 import T "types";
+import Cb "cbor";
 
 module {
 
@@ -25,6 +26,8 @@ module {
   public type Key = T.Key;
 
   public type Value = T.Value;
+
+  public let Cbor = Cb;
 
   public let { Content } = C;
 

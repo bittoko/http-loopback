@@ -19,11 +19,13 @@ module {
     #invalidValue: Text;
     #missing: Text;
     #invalid: Text;
+    #trapped: Text;
     #invalid_status: Nat;
     #invalid_reject_code: Nat;
     #unexpectedEndOfBytes;
     #unexpectedBreak;
     #server_error;
+    #expired: Text;
   };
 
   public type Request = {

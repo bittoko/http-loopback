@@ -20,16 +20,15 @@ module {
     };
 
     public func export_cbor() : T.Return<[Nat8], T.EncodingError> {
-      Cbor.encode(Cbor.fromMap(export_map()));
+      Cbor.encode(#majorType6({tag = 55799; value = Cbor.fromMap(export_map())}));
     };
 
     public func import_cbor(data: T.Cbor): T.Return<(), T.DecodingError> {
       switch( Cbor.decode( blobFromArray(data) ) ){
         case( #err msg ) #err(msg);
         case( #ok cbor ){
-          let ?map = Cbor.toMap( cbor ) else {
-            return #err(#invalid("Unsupported CBOR Type"))
-          };
+          let #majorType6(rec) = cbor else { return #err(#invalid("Unsupported CBOR response")) };
+          let ?map = Cbor.toMap( rec.value ) else { return #err(#invalid("Unsupported CBOR respnse")) };
           #ok( import_map( map ) )
         }
       }

@@ -32,6 +32,8 @@ module {
 
   public type CborArray = { #majorType4 : [CborValue] };
 
+  public type CborBytes = { #majorType2 : [Nat8] };
+  
   public type CborEntry = (CborText, CborValue);
 
   public type CborText = { #majorType3 : Text };

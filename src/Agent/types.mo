@@ -25,23 +25,26 @@ module {
 
   public type Response = { #ok: Content; #err: Client.Error };
 
-  public type CallRequest = { canister_id: Text; method_name: Text; arg: Blob };
-
   public type ReadRequest = { paths : Paths };
 
+  public type CallRequest = {
+    max_response_bytes: ?Nat64;
+    canister_id: Text;
+    method_name: Text;
+    arg: Blob
+  };
+
+  public type RequestType = {
+    #read_state: ReadRequest;
+    #query_method: CallRequest;
+    #update_method: CallRequest;
+  };
+
   public type Request = {
-    sender: Blob;
+    request: RequestType;
     ingress_expiry: Nat;
+    sender: Blob;
     nonce: ?Blob;
-    request: {
-      #read_state: ReadRequest;
-      #call_method: {
-        request_type: { #call; #query_ };
-        canister_id: Blob;
-        method_name: Text;
-        arg: Blob;
-      }
-    }
   };
 
 };

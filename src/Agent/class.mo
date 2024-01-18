@@ -1,6 +1,8 @@
 import { Nonce = { Nonce }; Fees = { Fees } } "../../../utilities/src";
-import Identity "../../../ECDSA/src/Identity";
-import { map_call_request; map_read_request } "utils";
+import { encodeUtf8; decodeUtf8 } "mo:base/Text";
+import { Identity } "../../../ECDSA/src";
+import Principal "mo:base/Principal";
+import { sign_request } "utils";
 import { Content } "../Content";
 import Time "mo:base/Time";
 import Client "../Client";
@@ -10,6 +12,7 @@ import T "types";
 module {
 
   type Client = Client.Client;
+
   type Identity = Identity.Identity;
 
   public class Agent(state: T.State, client : Client, identity: Identity) = {
@@ -17,30 +20,117 @@ module {
     let nonce_factory = Nonce.Nonce( state.agent_nonce );
 
     public func query_method(req: T.CallRequest) : async* T.Response {
-      
-
-      let content = Content(
-        map_call_request(#query_, req, {
-          principal = identity.principal;
-          nonce = nonce_factory.next_blob();
-          ingress_expiry = state.agent_ingress_expiry;
-        })
-      );
-
-      let hash : T.Hash = content.hash();
-      let cbor : T.Cbor = content.export_cbor();
-      let message_id : Blob = to_message_id( content_hash );
-
-      switch( await* identity.sign( message_id ) ){
-        
+      let request : T.Request = {
+        sender = Principal.toBlob( identity.principal );
+        ingress_expiry = state.agent_ingress_expiry;
+        nonce = ?nonce_factory.next_blob();
+        request = #query_method( req );
       };
-
+      switch( await* sign_request(identity, request) ){
+        case( #err msg ) #err(msg);
+        case( #ok (_, payload) ){
+          let c_request : Client.Request = {
+            max_response_bytes = req.max_response_bytes;
+            canister_id = req.canister_id;
+            data = payload;
+          };
+          switch( await* client.query_endpoint( req ) ){
+            case( #err msg ) #err(msg);
+            case( #ok cbor ){
+              let content = Content([]);
+              switch( content.import_cbor( cbor ) ){
+                case( #err msg ) #err(msg);
+                case( #ok ) #ok( content );
+              }
+            }
+          }
+        }
+      } 
     };
 
-    public func update_method(req: T.CallRequest) : T.Response {};
+    public func update_method(req: T.CallRequest) : async* T.Response {
+      var attempts : Nat = 0;
+      let expiration : Int = Time.now() + state.agent_ingress_expiry;
+      func read_state(reqid: T.RequestId): async* Client.Response {
+        if ( Time.now() >= expiration ) return #err( #expired( reqid ) );
+        attemps += 1;
+        switch( await* sign_and_send( #read_state( read_req ) ) ){
+          case( #err msg ) #err(msg);
+          case( #ok cbor ){
+            let content = Content([]);
+            content.import_cbor( cbor );
+            #ok( content )
+          };
+        }
+      };
+      switch( await* sign_and_send(#update_method( req ) ) ){
+        case( #err msg ) #err(msg);
+        case( #ok request_id ){
+          let read_req : T.ReadRequest = {
+            paths = [[ encodeUtf8("request_status"), Blob.fromArray(request_id) ]]
+          };
+          
+          switch( await* sign_and_send( #read_state( read_req ) ) ){
+            case( #err msg ) #err(msg);
+            case( #ok cbor ){
+              let content = Content([]);
+              content.import_cbor( cbor );
+              #ok( content )
+            }
+          };
+        }
+      };
+    };
 
-    public func read_state(req: T.ReadRequest) : T.Response {};
+    func read_state(attempts: Nat, exp: Int, req_id: T.RequestId): async* (Nat, Client.Response) {
+      if ( Time.now() >= exp ) return #err( #expired( req_id ) );
+      switch( await* sign_and_send( #read_state( read_req ) ) ){
+        case( #err msg ) #err(msg);
+        case( #ok cbor ){
+          let content = Content([]);
+          content.import_cbor( cbor );
+          
+        };
+      }
+    };
+
+    func sign_and_send(request_type: T.RequestType): async* T.Client.Response {
+      var is_update : Bool = false;
+      let request : T.Request = {
+        sender = Principal.toBlob( identity.principal );
+        ingress_expiry = state.agent_ingress_expiry;
+        nonce = ?nonce_factory.next_blob();
+        request = request_type;
+      };
+      switch( await* sign_request(identity, request) ){
+        case( #err msg ) #err(msg);
+        case( #ok (req_id, payload) ){
+          let client_request : Client.Request = {
+            max_response_bytes = req.max_response_bytes;
+            canister_id = req.canister_id;
+            data = payload;
+          };
+          let client_endpoint = switch( request_type ){
+            case( #read_state _ ) client.read_state_endpoint;
+            case( #query_method _ ) client.query_endpoint;
+            case( #update_method _ ) {
+              client.call_endpoint;
+              is_update := true
+            };
+          };
+          switch( await* client_endpoint( client_request ) ){
+            case( #err msg ) #err(msg);
+            case( #ok bytearray ){
+              if is_update #ok( Blob.toArray( encodeUtf8( req_id ) ) )
+              else #ok( bytearray )
+            }
+          }
+        }
+      }
+    };
 
   };
+
+
 
 };
