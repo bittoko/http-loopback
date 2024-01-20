@@ -3,7 +3,6 @@ import { encodeUtf8; decodeUtf8 } "mo:base/Text";
 import { Identity } "../../../ECDSA/src";
 import Principal "mo:base/Principal";
 import { sign_request } "utils";
-import { Content } "../Content";
 import Time "mo:base/Time";
 import Client "../Client";
 
@@ -11,11 +10,7 @@ import T "types";
 
 module {
 
-  type Client = Client.Client;
-
-  type Identity = Identity.Identity;
-
-  public class Agent(state: T.State, client : Client, identity: Identity) = {
+  public class Agent(state: T.State, client : T.Client, identity: T.Identity) = {
 
     let nonce_factory = Nonce.Nonce( state.agent_nonce );
 
