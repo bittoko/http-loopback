@@ -42,25 +42,22 @@ module {
       switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
         case( #err msg ) #err(msg);
         case( #ok fee ){
-          switch( encodeCbor(req.data) ){
-            case( #err msg ) #err(msg);
-            case( #ok payload ){
-              addCycles( nat64ToNat(fee) );
-              process_http_response(
-                await ic.http_request({
-                  method = #post;
-                  body = ?payload;
-                  transform = null;
-                  max_response_bytes = request.max_response_bytes;
-                  url = state.client_domain # state.client_path # request.canister_id # "/query";
-                  headers = [
-                    { name = "Content-Type"; value = "application/cbor" },
-                    { name = "Idempotency-Key"; value = nonce_factory.next_string() }
-                  ]
-                })
-              )
-            }
-          }
+          let tagged_value = { tag = 55799; value = reg.envelope };
+          let #ok( payload ) = encodeCbor( tagged_value ) else { return #err(#fatal("Client failed to encode CBOR")) };
+          addCycles( nat64ToNat(fee) );
+          process_http_response(
+            await ic.http_request({
+              method = #post;
+              body = ?payload;
+              transform = null;
+              max_response_bytes = request.max_response_bytes;
+              url = state.client_domain # state.client_path # request.canister_id # "/query";
+              headers = [
+                { name = "Content-Type"; value = "application/cbor" },
+                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
+              ]
+            })
+          )
         }
       }
     };
@@ -69,25 +66,22 @@ module {
       switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
         case( #err msg ) #err(msg);
         case( #ok fee ){
-          switch( encodeCbor(req.data) ){
-            case( #err msg ) #err(msg);
-            case( #ok payload ){
-              addCycles( nat64ToNat(fee) );
-              process_http_response(
-                await ic.http_request({
-                  method = #post;
-                  body = ?payload;
-                  transform = null;
-                  max_response_bytes = request.max_response_bytes;
-                  url = state.client_domain # state.client_path # request.canister_id # "/call";
-                  headers = [
-                    { name = "Content-Type"; value = "application/cbor" },
-                    { name = "Idempotency-Key"; value = nonce_factory.next_string() }
-                  ]
-                })
-              )
-            }
-          }
+          let tagged_value = { tag = 55799; value = reg.envelope };
+          let #ok( payload ) = encodeCbor( tagged_value ) else { return #err(#fatal("Client failed to encode CBOR")) };
+          addCycles( nat64ToNat(fee) );
+          process_http_response(
+            await ic.http_request({
+              method = #post;
+              body = ?payload;
+              transform = null;
+              max_response_bytes = request.max_response_bytes;
+              url = state.client_domain # state.client_path # request.canister_id # "/call";
+              headers = [
+                { name = "Content-Type"; value = "application/cbor" },
+                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
+              ]
+            })
+          )
         }
       }
     };
@@ -96,25 +90,22 @@ module {
       switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
         case( #err msg ) #err(msg);
         case( #ok fee ){
-          switch( encodeCbor(req.data) ){
-            case( #err msg ) #err(msg);
-            case( #ok payload ){
-              addCycles( nat64ToNat(fee) );
-              process_http_response(
-                await ic.http_request({
-                  method = #post;
-                  body = ?payload;
-                  transform = null;
-                  max_response_bytes = request.max_response_bytes;
-                  url = state.client_domain # state.client_path # request.canister_id # "/read_state";
-                  headers = [
-                    { name = "Content-Type"; value = "application/cbor" },
-                    { name = "Idempotency-Key"; value = nonce_factory.next_string() }
-                  ]
-                })
-              )
-            }
-          }
+          let tagged_value = { tag = 55799; value = reg.envelope };
+          let #ok( payload ) = encodeCbor( tagged_value ) else { return #err(#fatal("Client failed to encode CBOR")) };
+          addCycles( nat64ToNat(fee) );
+          process_http_response(
+            await ic.http_request({
+              method = #post;
+              body = ?payload;
+              transform = null;
+              max_response_bytes = request.max_response_bytes;
+              url = state.client_domain # state.client_path # request.canister_id # "/read_state";
+              headers = [
+                { name = "Content-Type"; value = "application/cbor" },
+                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
+              ]
+            })
+          )
         }
       }
     };
@@ -128,14 +119,15 @@ module {
           else{
             let #ok( cbor ) = decodeCbor( res.body ) else { #err(#invalid("Failed to decode CBOR in HTTP response body (0)")) };
             let #majorType6(rec) = cbor else { #err(#invalid("Incorrect CBOR type in HTTP response body (0)")) };
-            #ok( rec.value );
+            let #majorType5(map) = rec.value else { #err(#invalid("Incorrect CBOR type in tagged record (0)")) };
+            #ok( map );
           }
         };
         case( 200 ){
           let contet = Content();
           let #ok( cbor ) = decodeCbor( res.body ) else { #err(#invalid("Failed to decode CBOR in HTTP response body (1)")) };
           let #majorType6(rec) = cbor else { #err(#invalid("Incorrect CBOR type in HTTP response body (1)")) };
-          let #majorType5(map) = rec.valye else { #err(#invalid("Incorrect CBOR type in tagged record (0)")) };
+          let #majorType5(map) = rec.value else { #err(#invalid("Incorrect CBOR type in tagged record (1)")) };
           content.load(map);
           let ?reject_code = content.get<Nat64>("reject_code", unwrapNat64) else { return #err(#missing("reject_code")) };
           let ?reject_msg = content.get<Text>("reject_message", unwrapText) else { return #err(#missing("reject_message")) };

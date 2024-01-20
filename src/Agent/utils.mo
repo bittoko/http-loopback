@@ -25,18 +25,11 @@ module {
     switch( await* identity.sign(message_id) ){
       case( #err msg ) #err(msg);
       case( #ok sig ){
-        let envelope = #majorType6{
-          tag = 55799;
-          value = #majorType5([
-            (#majorType3("content"), wrap_content(request)),
-            (#majorType3("sender_pubkey"), #majorType2(Blob.toArray(identity.public_key))),
-            (#majorType3("sender_sig", #majorType2(Blob.toArray(sig)))),
-          ])
-        };
-        switch( Cbor.encode( envelope ) ){
-          case( #ok cbor ) (request_id, cbor);
-          case( #err msg ) #err(msg);
-        }
+        let envelope = Content();
+        envelope.set( "content", #majorType5(map_content( request )) );
+        envelope.set( "sender_pubkey", #majorType2(Blob.toArray(identity.public_key)) );
+        envelope.set( "sender_sig", #majorType2(Blob.toArray(sig)) );
+        (request_id, envelope.dump());
       }
     }
   };
@@ -50,37 +43,37 @@ module {
     )
   };
 
-  func wrap_content(req: T.Request): T.CborMap {
-    let buffer = Buffer.Buffer<T.CborEntry>(4);
-    buffer.add(( #majorType3("sender"), #majorType2(Blob.toArray(req.sender)) ));
-    buffer.add(( #majorType3("ingress_expiry"), #majorTyp0(req.ingress_expiry) ));
+  func map_content(req: T.Request): T.Map {
+    let content = Content();
+    content.set( "sender", #majorType2(Blob.toArray(req.sender)) );
+    content.set( "ingress_expiry", #majorTyp0(req.ingress_expiry) );
     switch( req.nonce ){
-      case( ?nonce ) buffer.add(( #majorType3("nonce"), #majorType2(Blob.toArray(nonce)) ));
+      case( ?nonce ) content.set( "nonce", #majorType2(Blob.toArray(nonce)) );
       case null ();
     };
     switch( req.request ){
       case( #update_method params ){
-        buffer.add(( #majorType3("request_type"), #majorType3("call") ));
-        buffer.add(( #majorType3("canister_id"), #majorType3(Blob.toArray(params.canister_id)) ));
-        buffer.add(( #majorType3("method_name"), #majorType3(params.method_name) ));
-        buffer.add(( #majorType3("arg"), #majorType2(Blob.toArray(params.arg)) ));
+        content.set( "request_type", #majorType3("call") );
+        content.set( "canister_id", #majorType3(Blob.toArray(params.canister_id)) );
+        content.set( "method_name", #majorType3(params.method_name) );
+        content.set( "arg", #majorType2(Blob.toArray(params.arg)) );
       };
       case( #query_method params ){
-        buffer.add(( #majorType3("request_type"), #majorType3("query") ));
-        buffer.add(( #majorType3("canister_id"), #majorType3(Blob.toArray(params.canister_id)) ));
-        buffer.add(( #majorType3("method_name"), #majorType3(params.method_name) ));
-        buffer.add(( #majorType3("arg"), #majorType2(Blob.toArray(params.arg)) ));
+        content.set( "request_type", #majorType3("query") );
+        content.set( "canister_id", #majorType3(Blob.toArray(params.canister_id)) );
+        content.set( "method_name", #majorType3(params.method_name) );
+        content.set( "arg", #majorType2(Blob.toArray(params.arg)) );
       };
       case( #read_state params ){
-        buffer.add(( #majorType3("paths"),
+        content.set( "paths",
           #majorType4( mapEntries<[Blob], T.CborArray>(params.path, func(state_path, _): T.CborArray {
             #majorType4( mapEntries<Blob, T.CborBytes>(state_path, func(path_label, _): T.CborBytes {
               #majorType2( Blob.toArray(path_label) )
             }))
           }))
-        ))
+        )
       }};
-    #majorType5( Buffer.toArray<T.CborEntry>( buffer ) );
+    content.dump()
   };
 
   func hash_content(req: T.Request): T.Hash {
