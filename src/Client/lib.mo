@@ -1,7 +1,7 @@
-import C "Class";
-import S "State";
-import T "Types";
-import Const "Const";
+import C "class";
+import S "state";
+import T "types";
+import Const "const";
 
 module {
 

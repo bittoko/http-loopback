@@ -1,39 +1,14 @@
 import { Nonce = { Nonce }; Fees } "../../../utilities/src";
 import { add = addCycles } "mo:base/ExperimentalCycles";
-import { fromNat = natToNat64 } "mo:base/Nat64";
-import { toNat = nat64ToNat } "mo:base/Nat64";
-import { get = getOpt } "mo:base/Option";
+import { encode = encodeCbor } "mo:cbor/Encoder";
+import { decode = decodeCbor } "mo:cbor/Decoder";
 import { Content; unwrapNat; unwrapText } "../Content";
-import S "State";
-import T "Types";
-import C "Const";
-import H "HTTP";
+import S "state";
+import T "types";
+import C "const";
+import H "http";
 
 module {
-
-  func process_http_response(res: H.HttpResponsePayload) : T.Response {
-    if ( res.status >= 500 ) return #err(#server_error);
-    if ( res.status >= 400 ) return #err(#malformed_request);
-    switch( res.status ){
-      case( 202 ) #ok( res.body );
-      case( 200 ){
-        let content = Content([]);
-        switch( content.import_cbor( res.body ) ){
-          case( #err msg ) #err(msg);
-          case( #ok ){
-            let ?reject_code = content.get<Nat>("reject_code", unwrapNat) else { return #err(#missing("reject_code")) };
-            let ?reject_msg = content.get<Text>("reject_message", unwrapText) else { return #err(#missing("reject_message")) };
-            switch( reject_code ){
-              case( 1 ) #err(#sys_fatal(reject_msg));
-              case( 2 ) #err(#sys_transient(reject_msg));
-              case( 3 ) #err(#destination_invalid(reject_msg));
-              case( 4 ) #err(#canister_reject(reject_msg));
-              case( 5 ) #err(#canister_error(reject_msg));
-              case( v ) #err(#invalid_reject_code(v));
-        }}}};
-      case( v ) #err(#invalid_status(v))
-    }
-  };
 
   public class Client(state: S.State) = {
 
@@ -67,20 +42,25 @@ module {
       switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
         case( #err msg ) #err(msg);
         case( #ok fee ){
-          addCycles( nat64ToNat(fee) );
-          process_http_response(
-            await ic.http_request({
-              method = #post;
-              body = ?request.data;
-              transform = null;
-              max_response_bytes = request.max_response_bytes;
-              url = state.client_domain # state.client_path # request.canister_id # "/query";
-              headers = [
-                { name = "Content-Type"; value = "application/cbor" },
-                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
-              ]
-            })
-          )
+          switch( encodeCbor(req.data) ){
+            case( #err msg ) #err(msg);
+            case( #ok payload ){
+              addCycles( nat64ToNat(fee) );
+              process_http_response(
+                await ic.http_request({
+                  method = #post;
+                  body = ?payload;
+                  transform = null;
+                  max_response_bytes = request.max_response_bytes;
+                  url = state.client_domain # state.client_path # request.canister_id # "/query";
+                  headers = [
+                    { name = "Content-Type"; value = "application/cbor" },
+                    { name = "Idempotency-Key"; value = nonce_factory.next_string() }
+                  ]
+                })
+              )
+            }
+          }
         }
       }
     };
@@ -89,20 +69,25 @@ module {
       switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
         case( #err msg ) #err(msg);
         case( #ok fee ){
-          addCycles( nat64ToNat(fee) );
-          process_http_response(
-            await ic.http_request({
-              method = #post;
-              body = ?request.data;
-              transform = null;
-              max_response_bytes = request.max_response_bytes;
-              url = state.client_domain # state.client_path # request.canister_id # "/call";
-              headers = [
-                { name = "Content-Type"; value = "application/cbor" },
-                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
-              ]
-            })
-          )
+          switch( encodeCbor(req.data) ){
+            case( #err msg ) #err(msg);
+            case( #ok payload ){
+              addCycles( nat64ToNat(fee) );
+              process_http_response(
+                await ic.http_request({
+                  method = #post;
+                  body = ?payload;
+                  transform = null;
+                  max_response_bytes = request.max_response_bytes;
+                  url = state.client_domain # state.client_path # request.canister_id # "/call";
+                  headers = [
+                    { name = "Content-Type"; value = "application/cbor" },
+                    { name = "Idempotency-Key"; value = nonce_factory.next_string() }
+                  ]
+                })
+              )
+            }
+          }
         }
       }
     };
@@ -111,23 +96,62 @@ module {
       switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
         case( #err msg ) #err(msg);
         case( #ok fee ){
-          addCycles( nat64ToNat(fee) );
-          process_http_response(
-            await ic.http_request({
-              method = #post;
-              body = ?request.data;
-              transform = null;
-              max_response_bytes = request.max_response_bytes;
-              url = state.client_domain # state.client_path # request.canister_id # "/read_state";
-              headers = [
-                { name = "Content-Type"; value = "application/cbor" },
-                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
-              ]
-            })
-          )
+          switch( encodeCbor(req.data) ){
+            case( #err msg ) #err(msg);
+            case( #ok payload ){
+              addCycles( nat64ToNat(fee) );
+              process_http_response(
+                await ic.http_request({
+                  method = #post;
+                  body = ?payload;
+                  transform = null;
+                  max_response_bytes = request.max_response_bytes;
+                  url = state.client_domain # state.client_path # request.canister_id # "/read_state";
+                  headers = [
+                    { name = "Content-Type"; value = "application/cbor" },
+                    { name = "Idempotency-Key"; value = nonce_factory.next_string() }
+                  ]
+                })
+              )
+            }
+          }
         }
       }
     };
+
+    func process_http_response(res: H.HttpResponsePayload) : T.Response {
+      if ( res.status >= 500 ) return #err(#rejected("server error"));
+      if ( res.status >= 400 ) return #err(#rejected("malformed request"));
+      switch( res.status ){
+        case( 202 ){
+          if ( res.body.size() == 0 ) #ok( #majorType7(#_null))
+          else{
+            let #ok( cbor ) = decodeCbor( res.body ) else { #err(#invalid("Failed to decode CBOR in HTTP response body (0)")) };
+            let #majorType6(rec) = cbor else { #err(#invalid("Incorrect CBOR type in HTTP response body (0)")) };
+            #ok( rec.value );
+          }
+        };
+        case( 200 ){
+          let contet = Content();
+          let #ok( cbor ) = decodeCbor( res.body ) else { #err(#invalid("Failed to decode CBOR in HTTP response body (1)")) };
+          let #majorType6(rec) = cbor else { #err(#invalid("Incorrect CBOR type in HTTP response body (1)")) };
+          let #majorType5(map) = rec.valye else { #err(#invalid("Incorrect CBOR type in tagged record (0)")) };
+          content.load(map);
+          let ?reject_code = content.get<Nat64>("reject_code", unwrapNat64) else { return #err(#missing("reject_code")) };
+          let ?reject_msg = content.get<Text>("reject_message", unwrapText) else { return #err(#missing("reject_message")) };
+          switch( reject_code ){
+            case( 1 ) #err( #rejected("sys_fatal: " # reject_msg) );
+            case( 2 ) #err( #rejected("sys_transient: " #reject_msg) );
+            case( 3 ) #err( #rejected("destination_invalid: " # reject_msg) );
+            case( 4 ) #err( #rejected("canister_reject: " #reject_msg) );
+            case( 5 ) #err( #rejected("canister_error: " # reject_msg) );
+            case( v ) #err( #rejected("invalid_reject_code: "  # debug_show(v)) );
+          }
+        };
+        case( v ) #err(#rejected("unknown response status: " # debug_show(v)) )
+      }
+    };
+  
   };
 
 };

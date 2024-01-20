@@ -1,47 +1,36 @@
-import { set = mapSet; get = mapGet; thash } "mo:map/Map";
-import { toArray = blobToArray; fromArray = blobFromArray } "mo:base/Blob";
+import { set = mapSet; get = mapGet; thash; new } "mo:map/Map";
 import { fromIter; toArray } "mo:map/Map";
-import Hash "hash";
-import Cbor "cbor";
+import { mapEntries } "mo:base/Array";
+import { trap } "mo:base/Debug";
 import T "types";
 
 module {
 
-  public class Content(map_: T.Map) = {
+  public class Content() = {
 
-    var hashmap = fromIter<T.Key, T.Value>(map_.vals(), thash);
+    var hashmap = new<T.Key, T.CborValue>();
 
-    public func export_map(): T.Map {
-      toArray<T.Key, T.Value>(hashmap)
-    };
+    public func set(k: T.Key, v: T.CborValue): () = mapSet(hashmap, thash, k, v);
 
-    public func import_map(map: T.Map): () {
-      hashmap := fromIter<T.Key, T.Value>(map.vals(), thash)
-    };
-
-    public func export_cbor() : T.Return<[Nat8], T.EncodingError> {
-      Cbor.encode(#majorType6({tag = 55799; value = Cbor.fromMap(export_map())}));
-    };
-
-    public func import_cbor(data: T.Cbor): T.Return<(), T.DecodingError> {
-      switch( Cbor.decode( blobFromArray(data) ) ){
-        case( #err msg ) #err(msg);
-        case( #ok cbor ){
-          let #majorType6(rec) = cbor else { return #err(#invalid("Unsupported CBOR response")) };
-          let ?map = Cbor.toMap( rec.value ) else { return #err(#invalid("Unsupported CBOR respnse")) };
-          #ok( import_map( map ) )
-        }
-      }
-    };
-
-    public func set(k: T.Key, v: T.Value): () = mapSet(hashmap, thash, k, v);
-
-    public func get<V>(k: T.Key, fn: (T.Value) -> ?V): ?V {
-      let ?value = mapGet(hashmap, thash, k) else { return null };
+    public func get<V>(k: T.Key, fn: (T.CborValue) -> ?V): ?V {
+      let ?value = mapGet<T.Key, T.CborValue>(hashmap, thash, k) else { return null };
       fn( value )
     };
+    
+    public func dump() : [T.CborEntry] {
+      mapEntries<T.Entry, T.CborEntry>(toArray(hashmap), func((key, val), _) = (#majorType3(key), val));
+    };
 
-    public func hash(): T.Hash = Hash.fromMap( export_map() );
+    public func load(data: T.CborMap): () {
+      hashmap := fromIter<T.Key, T.CborValue>(
+        mapEntries<T.CborEntry, T.Entry>(data, func((key, value), cnt): T.Entry {
+          switch( key ){
+            case( #majorType3 name ) (name, value);
+            case _ ("bad_field_" # debug_show(cnt), value);
+        }}).vals(),
+        thash
+      )
+    };
     
   };
 

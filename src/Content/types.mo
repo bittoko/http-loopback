@@ -1,49 +1,18 @@
 import Errors "mo:cbor/Errors";
+import Cbor "mo:cbor/Value";
 
 module {
 
-  public type Cbor = [Nat8];
-
-  public type Hash = Blob;
-
-  public type DecodingError = Errors.DecodingError;
-  
-  public type EncodingError = Errors.EncodingError;
-
-  public type Return<X,Y> = { #ok: X; #err: Y };
-
-  public type Map = [Entry];
-
-  public type Entry = (Key, Value);
-
-  public type Array = [Value];
-
   public type Key = Text;
 
-  public type Value = {
-    #map: Map;
-    #nat: Nat;
-    #blob: Blob;
-    #text: Text;
-    #array: [Value];
-  };
+  public type Entry = (Key, CborValue);
 
-  public type CborMap = { #majorType5 : [CborEntry]};
+  public type CborValue = Cbor.Value;
 
-  public type CborArray = { #majorType4 : [CborValue] };
-
-  public type CborBytes = { #majorType2 : [Nat8] };
+  public type CborMap = [CborEntry];
   
-  public type CborEntry = (CborText, CborValue);
-
-  public type CborText = { #majorType3 : Text };
-
-  public type CborValue = {
-    #majorType0 : Nat64;
-    #majorType2 : [Nat8];
-    #majorType3 : Text;
-    #majorType5 : [CborEntry];
-    #majorType4 : [CborValue];
-  };
+  public type CborArray = [CborValue];
+  
+  public type CborEntry = (CborValue, CborValue);
 
 };
