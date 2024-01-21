@@ -12,7 +12,9 @@ module {
   public type CborMap = [CborEntry];
   
   public type CborArray = [CborValue];
-  
+
   public type CborEntry = (CborValue, CborValue);
+
+  public type CborRecord = (Nat64, CborValue);
 
 };

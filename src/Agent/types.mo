@@ -10,23 +10,29 @@ module {
 
   public type Client = Client.Client;
 
-  public type ClientResponse = Client.Response;
-  
   public type Identity = ECDSA.Identity;
   
-  public type RequestId = Text;
+  public type RequestId = Blob;
 
   public type State = State.State;
 
   public type Map = Content.Map;
 
+  public type Candid = Blob;
+
   public type Content = Content.Content;
+
+  public type Certificate = Content.Certificate;
 
   public type Signature = Blob;
 
   public type Paths = [[Blob]];
 
-  public type Response = { #ok: Content; #err: Client.Error };
+  public type ClientResponse = { #ok: Content; #err: Client.Error };
+
+  public type Response = { #ok: Candid; #err: Client.Error };
+
+  public type Status = { #ok : (Text, Certificate); #err : Client.Error };
 
   public type ReadRequest = { paths : Paths };
 

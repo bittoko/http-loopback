@@ -1,10 +1,13 @@
 import C "class";
 import V "value";
 import T "types";
+import Cert "cert";
 
 module {
 
   public type Content = C.Content;
+
+  public type Certificate = Cert.Certificate;
 
   public type Key = T.Key;
 
@@ -12,7 +15,11 @@ module {
 
   public type Map = T.CborMap;
 
+  public type Record = T.CborRecord;
+
   public let { Content } = C;
+
+  public let { lookup } = Cert;
 
   public let { unwrapNat64; unwrapBytes; unwrapText } = V;
 

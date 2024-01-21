@@ -20,7 +20,7 @@ module {
 
   public func sign_request(identity: Identity, request: T.Request): async* AsyncReturn<(T.RequestId, T.Cbor)> {
     let hash : [Nat8] = hash_content( request );
-    let request_id : T.RequestId = toHex( hash );
+    let request_id : T.RequestId = to_request_id( hash );
     let message_id : Blob = to_message_id( hash );
     switch( await* identity.sign(message_id) ){
       case( #err msg ) #err(msg);
@@ -33,6 +33,8 @@ module {
       }
     }
   };
+
+  func to_request_id(hash: [Nat8]): Blob = Blob.fromArray(hash);
 
   func to_message_id(hash: [Nat8]): Blob {
     Blob.toArray(
@@ -107,34 +109,6 @@ module {
         ))
       }};
     Hash.hash_val( #Map( Buffer.toArray<(Text, T.Value)>( buffer ) ) )
-  };
-
-  /// The following code was sourced from gekctek's xtended-numbers library
-  ///
-  /// https://github.com/edjCase/motoko_numbers/blob/main/src/Util.mo
-  ///
-  /// The code has been modified to fit this use case
-  ///
-  func toHex(array : [Nat8]) : Text {
-    Array.foldLeft<Nat8, Text>(array, "", func (accum, w8) {
-      if (accum == "") "0x" # accum # encodeW8(w8)
-      else accum # encodeW8(w8)
-    });
-  };
-
-  let base : Nat8 = 0x10; 
-
-  let symbols = [
-    '0', '1', '2', '3', '4', '5', '6', '7',
-    '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
-  ];
-  /**
-  * Encode an unsigned 8-bit integer in hexadecimal format.
-  */
-  func encodeW8(w8 : Nat8) : Text {
-    let c1 = symbols[Nat8.toNat(w8 / base)];
-    let c2 = symbols[Nat8.toNat(w8 % base)];
-    Char.toText(c1) # Char.toText(c2);
   };
 
 };

@@ -18,7 +18,7 @@ module {
     #missing: Text;
     #invalid: Text;
     #trapped: Text;
-    #expired: Text;
+    #expired;
     #fatal: Text;
   };
 

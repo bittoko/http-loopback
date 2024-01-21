@@ -39,7 +39,7 @@ module {
     ?value
   };
 
-  public func unwrapRecord(v: T.CborValue): ?(Nat64, T.CborValue) {
+  public func unwrapRecord(v: T.CborValue): ?T.CborRecord {
     let #majorType6(rec) = v else { return null };
     ?(rec.tag, rec.value)
   };
