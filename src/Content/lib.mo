@@ -19,7 +19,7 @@ module {
 
   public let { Content } = C;
 
-  public let { lookup } = Cert;
+  public let Certificate = Cert;
 
   public let { unwrapNat64; unwrapBytes; unwrapText } = V;
 

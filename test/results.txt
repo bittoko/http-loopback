@@ -1,0 +1,11 @@
+Test files:
+• test/cert.test.mo
+==================================================
+Running test/cert.test.mo 
+   stdout [201, 22, 207, 76, 36, 69, 90, 43, 167, 227, 28, 96, 25, 241, 129, 40, 101, 105, 12, 246, 137, 232, 170, 84, 128, 143, 255, 183, 39, 23, 133, 177]
+ • Response Certificate
+   ✖ lookup_request_status
+   FAIL test/prim:62:31: execution error, explicit trap: 3
+==================================================
+Tests failed
+Done in 0.27s, passed 0, failed 1

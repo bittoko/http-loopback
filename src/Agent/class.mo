@@ -1,6 +1,6 @@
-import { Nonce = { Nonce }; Fees = { Fees } } "../../../utilities/src";
+import { Nonce = { Nonce }; Fees = { Fees } } "mo:utilities";
 import { encodeUtf8; decodeUtf8 } "mo:base/Text";
-import { Identity } "../../../ECDSA/src";
+import { Identity } "mo:ECDSA";
 import Principal "mo:base/Principal";
 import { sign_request } "utils";
 import { lookup } "../Content";
