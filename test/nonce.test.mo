@@ -1,5 +1,6 @@
 import {test; suite} "mo:test";
 import { Nonce } "mo:utilities";
+import { range } "mo:base/Iter";
 import { trap; print } "mo:base/Debug";
 
 suite("Nonce Class Methods", func(){
@@ -25,6 +26,13 @@ suite("Nonce Class Methods", func(){
   test("next_array()", func(){
 	let arr : [Nat8] = nonce_factory.next_array();
 	assert arr[0] == 0x03;
+  });
+
+  test("BigInt", func(){
+    for( i in range(0, 18446744073709551620)){
+	  ignore nonce_factory.next();
+	};
+	print(debug_show(nonce_factory.next()))
   });
 
 })

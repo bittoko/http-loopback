@@ -1,12 +1,11 @@
-import { Fees } "../../../utilities/src";
-import Content "../Content";
-import Cbor "mo:cbor/Value";
+import { Fees } "mo:utilities";
+import Cbor "../Cbor";
 
 module {
 
   public type URL = Text;
 
-  public type ContentMap = Content.Map; 
+  public type ContentMap = Cbor.ContentMap; 
 
   public type Response = { #ok: ContentMap; #err: Error };
 

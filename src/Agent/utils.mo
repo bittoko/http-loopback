@@ -1,10 +1,9 @@
 import Buffer "mo:base/Buffer";
-import Ecdsa "../../../ECDSA/src";
-import { Content } "../Content";
+import Ecdsa "mo:ECDSA";
+import Cbor "../Cbor";
 import Time "mo:base/Time";
 import Blob "mo:base/Blob";
 import Nat64 "mo:base/Nat64";
-import Cbor "mo:cbor/Encoder";
 import { init; mapEntries; tabulate } "mo:base/Array";
 import { toBlob = principalToBlob } "mo:base/Principal";
 import Hash "mo:rep-indy-hash";
@@ -25,11 +24,11 @@ module {
     switch( await* identity.sign(message_id) ){
       case( #err msg ) #err(msg);
       case( #ok sig ){
-        let envelope = Content();
+        let envelope = Cbor.load([]);
         envelope.set( "content", #majorType5(map_content( request )) );
         envelope.set( "sender_pubkey", #majorType2(Blob.toArray(identity.public_key)) );
         envelope.set( "sender_sig", #majorType2(Blob.toArray(sig)) );
-        (request_id, envelope.dump());
+        (request_id, envelope);
       }
     }
   };
@@ -46,7 +45,7 @@ module {
   };
 
   func map_content(req: T.Request): T.Map {
-    let content = Content();
+    let content = Cbor.load([]);
     content.set( "sender", #majorType2(Blob.toArray(req.sender)) );
     content.set( "ingress_expiry", #majorTyp0(req.ingress_expiry) );
     switch( req.nonce ){
@@ -75,7 +74,7 @@ module {
           }))
         )
       }};
-    content.dump()
+    content.to_cbor_map()
   };
 
   func hash_content(req: T.Request): T.Hash {

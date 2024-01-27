@@ -1,8 +1,6 @@
-import { Nonce = { Nonce }; Fees } "../../../utilities/src";
+import { Nonce = { Nonce }; Fees } "mo:utilities";
 import { add = addCycles } "mo:base/ExperimentalCycles";
-import { encode = encodeCbor } "mo:cbor/Encoder";
-import { decode = decodeCbor } "mo:cbor/Decoder";
-import { Content; unwrapNat; unwrapText } "../Content";
+import Cbor "../Cbor";
 import S "state";
 import T "types";
 import C "const";
@@ -30,6 +28,18 @@ module {
 
     public func get_fee(k: Text): T.ReturnFee = fees.get(k);
 
+    public func query_endpoint(request: T.Request): async* T.Response {
+      await* canister_endpoint(request, "/query")
+    };
+
+    public func call_endpoint(request: T.Request): async* T.Response {
+      await* canister_endpoint(request, "/call")
+    };
+
+    public func read_state_endpoint(request: T.Request): async* T.Response {
+      await* canister_endpoint(request, "/read_state")
+    };
+
     public func calculate_fee(request_bytes: Nat64, response_bytes: ?Nat64): T.ReturnFee {
       let max_response = getOpt<Nat64>(response_bytes, C.DEFAULT_MAX_RESPONSE_BYTES);
       let #ok(base_fee) = fees.get(C.FEE_KEY_PER_CALL) else { return #err(#fee_not_defined(C.FEE_KEY_PER_CALL)) };
@@ -37,69 +47,19 @@ module {
       let #ok(response_fee) = fees.multiply(C.FEE_KEY_PER_RESPONSE_BYTE, max_response) else { return #err(#fee_not_defined(C.FEE_KEY_PER_RESPONSE_BYTE)) };
       #ok(base_fee + request_fee + response_fee)
     };
-
-    public func query_endpoint(request: T.Request): async* T.Response {
+  
+    func canister_endpoint(request: T.Request, endpoint: Text): async* T.Response {
       switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
         case( #err msg ) #err(msg);
         case( #ok fee ){
-          let tagged_value = { tag = 55799; value = reg.envelope };
-          let #ok( payload ) = encodeCbor( tagged_value ) else { return #err(#fatal("Client failed to encode CBOR")) };
           addCycles( nat64ToNat(fee) );
           process_http_response(
             await ic.http_request({
               method = #post;
-              body = ?payload;
               transform = null;
+              body = ?Cbor.dump( request.envelope );
               max_response_bytes = request.max_response_bytes;
-              url = state.client_domain # state.client_path # request.canister_id # "/query";
-              headers = [
-                { name = "Content-Type"; value = "application/cbor" },
-                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
-              ]
-            })
-          )
-        }
-      }
-    };
-
-    public func call_endpoint(request: T.Request): async* T.Response {
-      switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
-        case( #err msg ) #err(msg);
-        case( #ok fee ){
-          let tagged_value = { tag = 55799; value = reg.envelope };
-          let #ok( payload ) = encodeCbor( tagged_value ) else { return #err(#fatal("Client failed to encode CBOR")) };
-          addCycles( nat64ToNat(fee) );
-          process_http_response(
-            await ic.http_request({
-              method = #post;
-              body = ?payload;
-              transform = null;
-              max_response_bytes = request.max_response_bytes;
-              url = state.client_domain # state.client_path # request.canister_id # "/call";
-              headers = [
-                { name = "Content-Type"; value = "application/cbor" },
-                { name = "Idempotency-Key"; value = nonce_factory.next_string() }
-              ]
-            })
-          )
-        }
-      }
-    };
-
-    public func read_state_endpoint(request: T.Request): async* T.Response {
-      switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
-        case( #err msg ) #err(msg);
-        case( #ok fee ){
-          let tagged_value = { tag = 55799; value = reg.envelope };
-          let #ok( payload ) = encodeCbor( tagged_value ) else { return #err(#fatal("Client failed to encode CBOR")) };
-          addCycles( nat64ToNat(fee) );
-          process_http_response(
-            await ic.http_request({
-              method = #post;
-              body = ?payload;
-              transform = null;
-              max_response_bytes = request.max_response_bytes;
-              url = state.client_domain # state.client_path # request.canister_id # "/read_state";
+              url = state.client_domain # state.client_path # request.canister_id # endpoint;
               headers = [
                 { name = "Content-Type"; value = "application/cbor" },
                 { name = "Idempotency-Key"; value = nonce_factory.next_string() }
@@ -114,23 +74,11 @@ module {
       if ( res.status >= 500 ) return #err(#rejected("server error"));
       if ( res.status >= 400 ) return #err(#rejected("malformed request"));
       switch( res.status ){
-        case( 202 ){
-          if ( res.body.size() == 0 ) #ok( #majorType7(#_null))
-          else{
-            let #ok( cbor ) = decodeCbor( res.body ) else { #err(#invalid("Failed to decode CBOR in HTTP response body (0)")) };
-            let #majorType6(rec) = cbor else { #err(#invalid("Incorrect CBOR type in HTTP response body (0)")) };
-            let #majorType5(map) = rec.value else { #err(#invalid("Incorrect CBOR type in tagged record (0)")) };
-            #ok( map );
-          }
-        };
+        case( 202 ) #ok( Cbor.load( res.body ) );
         case( 200 ){
-          let contet = Content();
-          let #ok( cbor ) = decodeCbor( res.body ) else { #err(#invalid("Failed to decode CBOR in HTTP response body (1)")) };
-          let #majorType6(rec) = cbor else { #err(#invalid("Incorrect CBOR type in HTTP response body (1)")) };
-          let #majorType5(map) = rec.value else { #err(#invalid("Incorrect CBOR type in tagged record (1)")) };
-          content.load(map);
-          let ?reject_code = content.get<Nat64>("reject_code", unwrapNat64) else { return #err(#missing("reject_code")) };
-          let ?reject_msg = content.get<Text>("reject_message", unwrapText) else { return #err(#missing("reject_message")) };
+          let content = Cbor.load( res.body );
+          let ?reject_code = content.get<Nat64>("reject_code", Cbor.getNat64) else { return #err(#missing("reject_code")) };
+          let ?reject_msg = content.get<Text>("reject_message", Cbor.getText) else { return #err(#missing("reject_message")) };
           switch( reject_code ){
             case( 1 ) #err( #rejected("sys_fatal: " # reject_msg) );
             case( 2 ) #err( #rejected("sys_transient: " #reject_msg) );

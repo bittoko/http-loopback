@@ -1,9 +1,8 @@
 import Client "../Client";
-import ECDSA "../../../ECDSA/src";
-import Content "../Content";
+import ECDSA "mo:ECDSA";
+import Cbor "../Cbor";
 import State "state";
 import Text "mo:base/Text";
-import Cbor "mo:cbor/Value";
 import Hash "mo:rep-indy-hash";
 
 module {
@@ -16,23 +15,25 @@ module {
 
   public type State = State.State;
 
-  public type Map = Content.Map;
-
   public type Candid = Blob;
 
-  public type Content = Content.Content;
+  public type HashTree = Cbor.HashTree;
 
-  public type Certificate = Content.Certificate;
+  public type ContentMap = Cbor.ContentMap;
+
+  public type Certificate = ContentMap;
 
   public type Signature = Blob;
 
   public type Paths = [[Blob]];
 
-  public type ClientResponse = { #ok: Content; #err: Client.Error };
-
   public type Response = { #ok: Candid; #err: Client.Error };
 
-  public type Status = { #ok : (Text, Certificate); #err : Client.Error };
+  public type ClientResponse = { #ok: (RequstId, ContentMap); #err: Client.Error };
+
+  public type Status = { #ok : (Text, HashTree); #err : Client.Error };
+
+  public type ReadResponse = { #ok : Certificate; #err : Client.Error };
 
   public type ReadRequest = { paths : Paths };
 
