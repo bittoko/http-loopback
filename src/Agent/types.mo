@@ -1,5 +1,5 @@
 import Client "../Client";
-import ECDSA "mo:ECDSA";
+import ECDSA "mo:tecdsa";
 import Cbor "../Cbor";
 import State "state";
 import Text "mo:base/Text";
@@ -10,12 +10,18 @@ module {
   public type Client = Client.Client;
 
   public type Identity = ECDSA.Identity;
+
+  public type Bytearray = [Nat8];
   
   public type RequestId = Blob;
 
   public type State = State.State;
 
   public type Candid = Blob;
+
+  public type CborArray = { #majorType4: [Cbor.CborValue] };
+
+  public type CborBytes = { #majorType2 : [Nat8] };
 
   public type HashTree = Cbor.HashTree;
 
@@ -29,13 +35,17 @@ module {
 
   public type Response = { #ok: Candid; #err: Client.Error };
 
-  public type ClientResponse = { #ok: (RequstId, ContentMap); #err: Client.Error };
+  public type SignResponse = { #ok: (RequestId, Bytearray); #err : Client.Error };
 
-  public type Status = { #ok : (Text, HashTree); #err : Client.Error };
+  public type Status = { #ok : (Text, Cbor.CborArray); #err : Client.Error };
 
-  public type ReadResponse = { #ok : Certificate; #err : Client.Error };
+  public type ReadResponse = { #ok : Bytearray; #err : Client.Error };
 
-  public type ReadRequest = { paths : Paths };
+  public type ReadRequest = {
+    max_response_bytes: ?Nat64;
+    canister_id: Text;
+    paths : Paths
+  };
 
   public type CallRequest = {
     max_response_bytes: ?Nat64;

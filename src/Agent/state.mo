@@ -1,4 +1,4 @@
-import { Fees; Nonce } "../../../utilities/src";
+import { Nonce } "mo:utilities";
 
 module {
 

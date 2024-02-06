@@ -1,4 +1,3 @@
-
 module {
 
   public let REQUEST_TYPE_READ_STATE : Text = "read_state";

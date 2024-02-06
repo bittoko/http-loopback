@@ -1,5 +1,6 @@
-import { Nonce = { Nonce }; Fees } "mo:utilities";
+import { fromNat = natToNat64; toNat = nat64ToNat } "mo:base/Nat64";
 import { add = addCycles } "mo:base/ExperimentalCycles";
+import { Nonce; Fees } "mo:utilities";
 import Cbor "../Cbor";
 import S "state";
 import T "types";
@@ -41,7 +42,7 @@ module {
     };
 
     public func calculate_fee(request_bytes: Nat64, response_bytes: ?Nat64): T.ReturnFee {
-      let max_response = getOpt<Nat64>(response_bytes, C.DEFAULT_MAX_RESPONSE_BYTES);
+      let max_response : Nat64 = switch(response_bytes){case(?n64)n64;case null C.DEFAULT_MAX_RESPONSE_BYTES};
       let #ok(base_fee) = fees.get(C.FEE_KEY_PER_CALL) else { return #err(#fee_not_defined(C.FEE_KEY_PER_CALL)) };
       let #ok(request_fee) = fees.multiply(C.FEE_KEY_PER_REQUEST_BYTE, request_bytes) else { return #err(#fee_not_defined(C.FEE_KEY_PER_REQUEST_BYTE)) };
       let #ok(response_fee) = fees.multiply(C.FEE_KEY_PER_RESPONSE_BYTE, max_response) else { return #err(#fee_not_defined(C.FEE_KEY_PER_RESPONSE_BYTE)) };
@@ -49,7 +50,7 @@ module {
     };
   
     func canister_endpoint(request: T.Request, endpoint: Text): async* T.Response {
-      switch( calculate_fee(natToNat64(request.data.size()), request.max_response_bytes) ) {
+      switch( calculate_fee(natToNat64(request.envelope.size()), request.max_response_bytes) ) {
         case( #err msg ) #err(msg);
         case( #ok fee ){
           addCycles( nat64ToNat(fee) );
@@ -57,7 +58,7 @@ module {
             await ic.http_request({
               method = #post;
               transform = null;
-              body = ?Cbor.dump( request.envelope );
+              body = ?request.envelope;
               max_response_bytes = request.max_response_bytes;
               url = state.client_domain # state.client_path # request.canister_id # endpoint;
               headers = [
@@ -74,7 +75,7 @@ module {
       if ( res.status >= 500 ) return #err(#rejected("server error"));
       if ( res.status >= 400 ) return #err(#rejected("malformed request"));
       switch( res.status ){
-        case( 202 ) #ok( Cbor.load( res.body ) );
+        case( 202 ) #ok( res.body );
         case( 200 ){
           let content = Cbor.load( res.body );
           let ?reject_code = content.get<Nat64>("reject_code", Cbor.getNat64) else { return #err(#missing("reject_code")) };

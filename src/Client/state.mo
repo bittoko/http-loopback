@@ -1,7 +1,6 @@
-import { Fees; Nonce } "../../../utilities/src";
-import { Identity } "../../../ECDSA/src";
 import { get = getOpt } "mo:base/Option";
-
+import { Fees; Nonce } "mo:utilities";
+import { Identity } "mo:tecdsa";
 
 module {
 
