@@ -1,0 +1,8 @@
+[dependencies]
+base = "0.10.3"
+utilities = "1.0.0"
+sha2 = "0.0.4"
+stable-buffer = "1.0.1"
+tecdsa = "0.0.3"
+rep-indy-hash = "0.1.1"
+cbor = "0.1.3"

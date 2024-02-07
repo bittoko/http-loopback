@@ -23,4 +23,6 @@ module {
 
   public let State = S;
 
+  public let { FEES } = Const;
+
 };

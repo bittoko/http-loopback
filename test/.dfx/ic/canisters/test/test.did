@@ -1,0 +1,13 @@
+type Test = 
+ service {
+   generate_new_identity: () -> (opt record {
+                                       nat;
+                                       vec text;
+                                     });
+   get_principal: (nat) -> (principal) query;
+   get_public_key: (nat) -> (vec nat8) query;
+   hello: (text) -> (text) query;
+   loopback: (nat, text) -> (opt text);
+   sign_message: (nat) -> (opt blob);
+ };
+service : () -> Test
