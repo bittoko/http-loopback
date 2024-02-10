@@ -20,7 +20,7 @@ module {
 
   public type CborRecord = T.CborRecord;
 
-  public let { load; dump } = C;
+  public let { load; dump; populated; from_cbor_map } = C;
 
   public func getNat64(v: CborValue): ?Nat64 {
     let #majorType0(value) = v else { return null };
@@ -46,4 +46,10 @@ module {
     let #majorType4( arr ) = v else { return null };
     ?arr
   };
+
+  public func getMap(v: CborValue): ?CborMap{
+    let #majorType5( map ) = v else { return null };
+    ?map
+  };
+
 };

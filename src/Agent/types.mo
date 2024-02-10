@@ -37,7 +37,9 @@ module {
 
   public type SignResponse = { #ok: (RequestId, Bytearray); #err : Client.Error };
 
-  public type Status = { #ok : (Text, Cbor.CborArray); #err : Client.Error };
+  public type SignAndSendResponse = { #ok: (RequestId, Client.ResponseType); #err : Client.Error };
+
+  public type Status = { #ok : Client.ResponseType; #err : Client.Error };
 
   public type ReadResponse = { #ok : Bytearray; #err : Client.Error };
 

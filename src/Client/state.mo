@@ -5,10 +5,10 @@ import { Identity } "mo:tecdsa";
 module {
 
   public type State = {
-    var client_path: Text;
-    var client_domain: Text;
-    var client_nonce: Nonce.State;
-    var client_fees: Fees.State;
+    var path: Text;
+    var domain: Text;
+    var nonce: Nonce.State;
+    var fees: Fees.State;
   };
 
   public type InitParams = {
@@ -19,10 +19,10 @@ module {
   };
 
   public func init(params: InitParams): State = {
-    var client_path = params.path;
-    var client_domain = params.domain;
-    var client_nonce = params.nonce;
-    var client_fees = params.fees;
+    var path = params.path;
+    var domain = params.domain;
+    var nonce = params.nonce;
+    var fees = params.fees;
   };
 
 };

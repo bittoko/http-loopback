@@ -7,7 +7,9 @@ module {
 
   public type ContentMap = Cbor.ContentMap; 
 
-  public type Response = { #ok: Bytearray; #err: Error };
+  public type Response = { #ok: ResponseType; #err: Error };
+
+  public type ResponseType = { #unknown; #replied : Bytearray; #rejected : Bytearray };
 
   public type ReturnFee = Fees.Return;
 

@@ -34,7 +34,7 @@ module {
     public func get<V>(k: T.Key, fn: T.ValueFn<V>): ?V = get_key_value<V>(hashmap, k, fn);
   };
 
-  func populated(hashmap: T.Map): T.ContentMap = object {
+  public func populated(hashmap: T.Map): T.ContentMap = object {
     public func map(): T.Map = hashmap;
     public func map_cbor(): T.CborMap = to_cbor_map( hashmap );
     public func set(k: T.Key, v: T.CborValue) = set_key_value(hashmap, k, v);
@@ -59,7 +59,7 @@ module {
     (55799, #majorType5( cbor_map ))
   };
 
-  func from_cbor_map(data: T.CborMap): T.Map {
+  public func from_cbor_map(data: T.CborMap): T.Map {
     fromIter<T.Key, T.CborValue>(
       mapEntries<T.CborEntry, T.Entry>(data, func((key, value), cnt): T.Entry {
         switch( key ){

@@ -10,12 +10,13 @@ shared actor class Test() = self {
 
   stable let state = State.init();
 
-  let { Client; Agent } = Loopback;
+  let { Client; Agent; Http } = Loopback;
 
   let { Manager; SECP256K1 = { CURVE; ID = { TEST_KEY_1 } } } = ECDSA;
 
-  let loopback_client = Client.Client( state.client_state );
   let identity_manager = Manager.Manager( state.manager_state );
+
+  state.agent_state.agent_ingress_expiry := 60_000_000_000;
 
   public shared query func hello(t: Text): async Text { "hello " # t # "!" };
   
@@ -26,7 +27,7 @@ shared actor class Test() = self {
     }
   };
 
-  public shared query func get_principal(id: Nat): async Principal {
+  public shared func get_principal(id: Nat): async Principal {
     let identity = identity_manager.get_slot( id );
     identity.get_principal()
   };
@@ -48,8 +49,11 @@ shared actor class Test() = self {
     }
   };
 
-  public func loopback(id: Nat, t: Text): async ?Text {
+  public query func transform(args: Http.TransformArgs): async Http.HttpResponsePayload { Loopback.transform(args) };
+
+  public func loopback(id: Nat, t: Text): async {#ok: ?Text; #err: Client.Error} {
     let identity = identity_manager.get_slot( id );
+    let loopback_client = Client.Client(state.client_state, transform);
     let agent = Agent.Agent(state.agent_state, loopback_client, identity);
     let service = Service(agent, toText(fromActor(self)));
     await* service.hello( t )

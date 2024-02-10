@@ -1,5 +1,6 @@
 import A "Agent";
 import C "Client";
+import T "transform";
 
 module {
 
@@ -10,5 +11,9 @@ module {
   public let Client = C;
 
   public type Client = C.Client;
+
+  public let { Http } = Client;
+
+  public let { transform } = T;
 
 }

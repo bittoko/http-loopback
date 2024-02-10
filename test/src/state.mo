@@ -9,7 +9,6 @@ module {
   public let { FEES = { ID = FEE_ID; APP = FEE_AMT } } = Client;
 
   public type State = {
-    ingress_expiry: Nat64;
     manager_state : ECDSA.Manager.State;
     client_state : Client.State;
     agent_state : Agent.State;
@@ -23,9 +22,8 @@ module {
       (FEE_ID.PER_CALL, FEE_AMT.PER_CALL),
     ]);
     return {
-      ingress_expiry = 60_000_000_000;
       manager_state = ECDSA.Manager.State.init({canister_id = "aaaaa-aa"; fees = fees});
-      agent_state = Agent.State.init({ingress_expiry = 60_000_000_000});
+      agent_state = Agent.State.init({ingress_expiry = 120_000_000_000});
       client_state = Client.State.init({
         domain = "https://icp-api.io";
         path = "/api/v2/canister/";

@@ -1,4 +1,4 @@
-import { Agent } "../../src";
+import { Agent; Client } "../../src";
 
 module {
 
@@ -6,7 +6,7 @@ module {
 
   public class Service(agent: Agent, canister_id: Text) = {
 
-    public func hello(t: Text): async* ?Text {
+    public func hello(t: Text): async* {#ok: ?Text; #err: Client.Error} {
       switch(
         await* agent.query_method(
           {
@@ -17,8 +17,8 @@ module {
           }
         )
       ){
-        case( #ok candid ) from_candid( candid );
-        case( #err msg ) null;
+        case( #ok candid ) #ok( from_candid( candid ) );
+        case( #err msg ) #err(msg)
       }
     };
 

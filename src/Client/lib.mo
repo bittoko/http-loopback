@@ -1,6 +1,7 @@
 import C "class";
 import S "state";
 import T "types";
+import H "http";
 import Const "const";
 
 module {
@@ -15,6 +16,8 @@ module {
 
   public type Response = T.Response;
 
+  public type ResponseType = T.ResponseType;
+
   public type ReturnFee = T.ReturnFee;
 
   public type Error = T.Error;
@@ -24,5 +27,7 @@ module {
   public let State = S;
 
   public let { FEES } = Const;
+
+  public let Http = H;
 
 };

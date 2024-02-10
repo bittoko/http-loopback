@@ -1,11 +1,42 @@
+type TransformArgs = 
+ record {
+   context: blob;
+   response: HttpResponsePayload;
+ };
+type HttpResponsePayload = 
+ record {
+   body: vec nat8;
+   headers: vec HttpHeader;
+   status: nat;
+ };
+type HttpHeader = 
+ record {
+   name: text;
+   value: text;
+ };
+type Error = 
+ variant {
+   expired;
+   fatal: text;
+   fee_not_defined: text;
+   invalid: text;
+   missing: text;
+   other: text;
+   rejected: text;
+   trapped: text;
+ };
 service : {
   generate_new_identity: () -> (opt record {
                                       nat;
                                       vec text;
                                     });
-  get_principal: (nat) -> (principal) query;
+  get_principal: (nat) -> (principal);
   get_public_key: (nat) -> (vec nat8) query;
-  hello: (text) -> (text) query;
-  loopback: (nat, text) -> (opt text);
+  hello: (text) -> (text);
+  loopback: (nat, text) -> (variant {
+                              err: Error;
+                              ok: opt text;
+                            });
   sign_message: (nat) -> (opt blob);
+  transform: (TransformArgs) -> (HttpResponsePayload) query;
 }

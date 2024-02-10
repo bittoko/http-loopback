@@ -30,8 +30,10 @@ module {
     body : [Nat8];
   };
 
+  public type TransformFunction = shared query TransformArgs -> async HttpResponsePayload;
+
   public type TransformRawResponseFunction = {
-    function : shared query TransformArgs -> async HttpResponsePayload;
+    function : TransformFunction;
     context : Blob;
   };
 
