@@ -1,6 +1,6 @@
 [package]
 name = "http-loopback"
-version = "0.1.0"
+version = "0.1.1"
 description = "Http loopback; call canisters using http outcalls"
 repository = "https://github.com/bittoko/http-loopback"
 keywords = [ "http", "loopback", "outcalls" ]
