@@ -1,3 +1,11 @@
+[package]
+name = "http-loopback"
+version = "0.1.0-alpha"
+description = "Http loopback; call canisters using http outcalls"
+repository = "https://github.com/bittoko/http-loopback"
+keywords = [ "http", "loopback", "outcalls" ]
+license = "MIT"
+
 [dependencies]
 base = "0.10.2"
 cbor = "0.1.3"
