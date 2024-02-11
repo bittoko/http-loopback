@@ -1,7 +1,11 @@
 # http-loopback
 
 ## Description
-This package enables Motoko canisters to call other canister using the Http Outcalls feature of the Internet Computer.
+"a Motoko agent for the Internet Computer"
+
+This is my attempt at recreating Rocklabs' IC-PY Python Agent in Motoko.
+
+This package enables Motoko canisters to call other canisters using the Http Outcalls feature of the Internet Computer.
 
 ## Major Dependencies
 tecdsa - Allows you to generate and manage Threshold ECDSA identities

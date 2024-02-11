@@ -1,2 +1,4 @@
 .mops
+test/.dfx
 test/src/debug_main.mo
+test/canister_ids.json
