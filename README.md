@@ -5,7 +5,12 @@ This package enables Motoko canisters to call other canister using the Http Outc
 
 ## Major Dependencies
 tecdsa - Allows you to generate and manage Threshold ECDSA identities
+
+https://mops.one/tecdsa
+
 utilities - Provides convenient classes for nonce generation and fee management
+
+https://mops.one/utilities
 
 ## CAUTION
 I'm publishing this package because it *seems* to work fine and I want to share with others.
