@@ -65,6 +65,7 @@ module {
         content.set( "arg", #majorType2(Blob.toArray(params.arg)) );
       };
       case( #read_state params ){
+        content.set( "request_type", #majorType3("read_state") );
         content.set( "paths",
           #majorType4( mapEntries<[Blob], T.CborArray>(params.paths, func(state_path, _): T.CborArray {
             #majorType4( mapEntries<Blob, T.CborBytes>(state_path, func(path_label, _): T.CborBytes {
@@ -98,6 +99,7 @@ module {
         buffer.add(("arg", #Blob(params.arg)));
       };
       case( #read_state params ){
+        buffer.add(("request_type", #Text("read_state")));
         buffer.add(("paths",
           #Array( mapEntries<[Blob], Hash.Value>(params.paths, func(state_path, _): Hash.Value {
             #Array( mapEntries<Blob, Hash.Value>(state_path, func(path_label, _): Hash.Value {

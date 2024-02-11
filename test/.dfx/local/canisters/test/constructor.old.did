@@ -1,11 +1,113 @@
+type Value = 
+ variant {
+   majorType0: nat64;
+   majorType1: int;
+   majorType2: vec nat8;
+   majorType3: text;
+   majorType4: vec Value;
+   majorType5: vec record {
+                     Value;
+                     Value;
+                   };
+   majorType6: record {
+                 tag: nat64;
+                 value: Value;
+               };
+   majorType7:
+    variant {
+      _break;
+      _null;
+      _undefined;
+      "bool": bool;
+      float: FloatX;
+      integer: nat8;
+    };
+ };
+type TransformArgs = 
+ record {
+   context: blob;
+   response: HttpResponsePayload;
+ };
+type HttpResponsePayload = 
+ record {
+   body: vec nat8;
+   headers: vec HttpHeader;
+   status: nat;
+ };
+type HttpHeader = 
+ record {
+   name: text;
+   value: text;
+ };
+type FloatX = 
+ record {
+   exponent: opt int;
+   isNegative: bool;
+   mantissa: nat;
+   precision: FloatPrecision;
+ };
+type FloatPrecision = 
+ variant {
+   f16;
+   f32;
+   f64;
+ };
+type Error = 
+ variant {
+   expired;
+   fatal: text;
+   fee_not_defined: text;
+   invalid: text;
+   missing: text;
+   other: text;
+   rejected: text;
+   trapped: text;
+ };
+type CborValue = 
+ variant {
+   majorType0: nat64;
+   majorType1: int;
+   majorType2: vec nat8;
+   majorType3: text;
+   majorType4: vec Value;
+   majorType5: vec record {
+                     Value;
+                     Value;
+                   };
+   majorType6: record {
+                 tag: nat64;
+                 value: Value;
+               };
+   majorType7:
+    variant {
+      _break;
+      _null;
+      _undefined;
+      "bool": bool;
+      float: FloatX;
+      integer: nat8;
+    };
+ };
+type CborMap = vec CborEntry;
+type CborEntry = 
+ record {
+   CborValue;
+   CborValue;
+ };
 service : {
+  debug_bad: () -> (CborMap) query;
+  debug_good: () -> (CborMap) query;
   generate_new_identity: () -> (opt record {
                                       nat;
                                       vec text;
                                     });
-  get_principal: (nat) -> (principal) query;
+  get_principal: (nat) -> (principal);
   get_public_key: (nat) -> (vec nat8) query;
-  hello: (text) -> (text) query;
-  loopback: (nat, text) -> (opt text);
+  hello: (text) -> (text);
+  loopback: (nat, text) -> (variant {
+                              err: Error;
+                              ok: opt text;
+                            });
   sign_message: (nat) -> (opt blob);
+  transform: (TransformArgs) -> (HttpResponsePayload) query;
 }

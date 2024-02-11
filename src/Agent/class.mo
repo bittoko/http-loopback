@@ -17,7 +17,7 @@ module {
     let nonce_factory = Nonce.Nonce( state.agent_nonce );
 
     public func query_method(req: T.CallRequest) : async* T.Response {
-      switch( await* sign_and_send(#query_method(req)) ){
+      switch( await* sign_and_send(#query_method(req), null) ){
         case( #err msg ) #err(msg);
         case( #ok(_, response) ){
           switch( response ){
@@ -30,7 +30,7 @@ module {
     };
 
     public func update_method(req: T.CallRequest) : async* T.Response {
-      switch( await* sign_and_send(#update_method(req)) ){
+      switch( await* sign_and_send(#update_method(req), null) ){
         case( #err msg ) return #err(msg);
         case( #ok(req_id, response) ){
           switch( response ){
@@ -51,7 +51,7 @@ module {
                   canister_id = req.canister_id;
                   max_response_bytes = req.max_response_bytes;
                   paths = [[ encodeUtf8("request_status"), req_id ]];
-                })
+                }), ?req_id
               )
             ){
               case( #err msg ) return #err(msg);
@@ -71,7 +71,7 @@ module {
       }
     };
 
-    func sign_and_send(rtype: T.RequestType): async* T.SignAndSendResponse {
+    func sign_and_send(rtype: T.RequestType, opt_context: ?Blob): async* T.SignAndSendResponse {
 
       let (cid, mrb, client_endpoint) = switch( rtype ){
         case( #read_state req ) (req.canister_id, req.max_response_bytes, client.read_state_endpoint);
@@ -92,14 +92,14 @@ module {
       ){
         case( #err msg ) #err(msg);
         case( #ok (reqid, env) ){
-
+          let context = switch opt_context {case(?x)x;case null reqid};
           let request = {
             max_response_bytes = mrb;
             canister_id = cid;
             envelope = env;
           };
 
-          switch( await* client_endpoint(request, reqid)) {
+          switch( await* client_endpoint(request, context)) {
             case( #ok content ) #ok(reqid, content);
             case( #err msg ) #err(msg);
           }

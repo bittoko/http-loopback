@@ -1,7 +1,6 @@
 import T "types";
 import C "content";
 import { HashTree = HT } "tree";
-
 module {
 
   public type Key = T.Key;

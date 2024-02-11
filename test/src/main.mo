@@ -1,10 +1,14 @@
 import ECDSA "mo:tecdsa";
 import Loopback "../../src";
+import Cbor "../../src/Cbor";
+import CborValue "mo:cbor/Value";
+import CborDecoder "mo:cbor/Decoder";
 import { toBlob; fromActor; toText } "mo:base/Principal";
 import { encodeUtf8 } "mo:base/Text";
 import { print } "mo:base/Debug";
 import { Service } "service";
 import State "state";
+import Blob "mo:base/Blob";
 
 shared actor class Test() = self {
 
@@ -16,10 +20,10 @@ shared actor class Test() = self {
 
   let identity_manager = Manager.Manager( state.manager_state );
 
-  state.agent_state.agent_ingress_expiry := 60_000_000_000;
+  state.agent_state.agent_ingress_expiry := 90_000_000_000;
 
-  public shared query func hello(t: Text): async Text { "hello " # t # "!" };
-  
+  public shared func hello(t: Text): async Text { "hello " # t # "!" };
+
   public shared func generate_new_identity(): async ?(Nat, [Text]) {
     switch( await* identity_manager.fill_next_slot({curve=CURVE; name=TEST_KEY_1}) ){
       case( #err _ ) null;

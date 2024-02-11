@@ -8,7 +8,7 @@ module {
 
     public func hello(t: Text): async* {#ok: ?Text; #err: Client.Error} {
       switch(
-        await* agent.query_method(
+        await* agent.update_method(
           {
             max_response_bytes = null;
             canister_id = canister_id;
