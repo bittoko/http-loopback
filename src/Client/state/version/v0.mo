@@ -1,15 +1,8 @@
-import { get = getOpt } "mo:base/Option";
-import { Fees; Nonce } "mo:utilities";
-import { Identity } "mo:tecdsa";
+import { Fees; Nonce; Cycles } "mo:utilities";
 
-module {
+module { 
 
-  public type State = {
-    var path: Text;
-    var domain: Text;
-    var nonce: Nonce.State;
-    var fees: Fees.State;
-  };
+  public type Predecessors = { #null_ };
 
   public type InitParams = {
     nonce: Nonce.State;
@@ -17,6 +10,13 @@ module {
     domain: Text;
     path: Text;
   };
+  
+  public type State = {
+    var path: Text;
+    var domain: Text;
+    var nonce: Nonce.State;
+    var fees: Fees.State;
+  }; 
 
   public func init(params: InitParams): State = {
     var path = params.path;
@@ -25,4 +25,4 @@ module {
     var fees = params.fees;
   };
 
-};
+}

@@ -1,4 +1,10 @@
 export const idlFactory = ({ IDL }) => {
+  const AsyncError = IDL.Variant({
+    'other' : IDL.Text,
+    'fee_not_defined' : IDL.Text,
+    'trapped' : IDL.Text,
+  });
+  const AsyncReturn = IDL.Variant({ 'ok' : IDL.Null, 'err' : AsyncError });
   const Error = IDL.Variant({
     'expired' : IDL.Null,
     'missing' : IDL.Text,
@@ -20,20 +26,16 @@ export const idlFactory = ({ IDL }) => {
     'response' : HttpResponsePayload,
   });
   const Test = IDL.Service({
-    'generate_new_identity' : IDL.Func(
-        [],
-        [IDL.Opt(IDL.Tuple(IDL.Nat, IDL.Vec(IDL.Text)))],
-        [],
-      ),
     'get_principal' : IDL.Func([IDL.Nat], [IDL.Principal], []),
     'get_public_key' : IDL.Func([IDL.Nat], [IDL.Vec(IDL.Nat8)], ['query']),
     'hello' : IDL.Func([IDL.Text], [IDL.Text], []),
+    'init' : IDL.Func([], [AsyncReturn], []),
     'loopback' : IDL.Func(
-        [IDL.Nat, IDL.Text],
+        [IDL.Text],
         [IDL.Variant({ 'ok' : IDL.Opt(IDL.Text), 'err' : Error })],
         [],
       ),
-    'sign_message' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Vec(IDL.Nat8))], []),
+    'sign_message' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Vec(IDL.Nat8))], []),
     'transform' : IDL.Func([TransformArgs], [HttpResponsePayload], ['query']),
   });
   return Test;

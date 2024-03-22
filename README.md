@@ -7,6 +7,9 @@ This is my attempt at recreating Rocklabs' IC-PY Python Agent in Motoko.
 
 This package enables Motoko canisters to call other canisters using the Http Outcalls feature of the Internet Computer.
 
+## Changelog
+v0.2.0 - Breaking change to State type and methods to allow for type migrations
+
 ## Major Dependencies
 tecdsa - Allows you to generate and manage Threshold ECDSA identities
 

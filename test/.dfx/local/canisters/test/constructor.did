@@ -1,28 +1,3 @@
-type Value = 
- variant {
-   majorType0: nat64;
-   majorType1: int;
-   majorType2: vec nat8;
-   majorType3: text;
-   majorType4: vec Value;
-   majorType5: vec record {
-                     Value;
-                     Value;
-                   };
-   majorType6: record {
-                 tag: nat64;
-                 value: Value;
-               };
-   majorType7:
-    variant {
-      _break;
-      _null;
-      _undefined;
-      "bool": bool;
-      float: FloatX;
-      integer: nat8;
-    };
- };
 type TransformArgs = 
  record {
    context: blob;
@@ -30,20 +5,15 @@ type TransformArgs =
  };
 type Test = 
  service {
-   debug_bad: () -> (CborMap) query;
-   debug_good: () -> (opt Value) query;
-   generate_new_identity: () -> (opt record {
-                                       nat;
-                                       vec text;
-                                     });
    get_principal: (nat) -> (principal);
    get_public_key: (nat) -> (vec nat8) query;
    hello: (text) -> (text);
-   loopback: (nat, text) -> (variant {
-                               err: Error;
-                               ok: opt text;
-                             });
-   sign_message: (nat) -> (opt blob);
+   init: () -> (AsyncReturn);
+   loopback: (text) -> (variant {
+                          err: Error;
+                          ok: opt text;
+                        });
+   sign_message: (text) -> (opt blob);
    transform: (TransformArgs) -> (HttpResponsePayload) query;
  };
 type HttpResponsePayload = 
@@ -57,19 +27,6 @@ type HttpHeader =
    name: text;
    value: text;
  };
-type FloatX = 
- record {
-   exponent: opt int;
-   isNegative: bool;
-   mantissa: nat;
-   precision: FloatPrecision;
- };
-type FloatPrecision = 
- variant {
-   f16;
-   f32;
-   f64;
- };
 type Error = 
  variant {
    expired;
@@ -81,35 +38,15 @@ type Error =
    rejected: text;
    trapped: text;
  };
-type CborValue = 
+type AsyncReturn = 
  variant {
-   majorType0: nat64;
-   majorType1: int;
-   majorType2: vec nat8;
-   majorType3: text;
-   majorType4: vec Value;
-   majorType5: vec record {
-                     Value;
-                     Value;
-                   };
-   majorType6: record {
-                 tag: nat64;
-                 value: Value;
-               };
-   majorType7:
-    variant {
-      _break;
-      _null;
-      _undefined;
-      "bool": bool;
-      float: FloatX;
-      integer: nat8;
-    };
+   err: AsyncError;
+   ok;
  };
-type CborMap = vec CborEntry;
-type CborEntry = 
- record {
-   CborValue;
-   CborValue;
+type AsyncError = 
+ variant {
+   fee_not_defined: text;
+   other: text;
+   trapped: text;
  };
 service : () -> Test

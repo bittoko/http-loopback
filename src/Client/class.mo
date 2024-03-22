@@ -11,10 +11,12 @@ import H "http";
 
 module {
 
-  public class Client(state: S.State, transformFn: H.TransformFunction) = {
+  public class Client(state_: S.State, transformFn: H.TransformFunction) = {
 
     let ic : H.IC = actor("aaaaa-aa");
 
+    let state = S.unwrap( state_ );
+    
     let fees = Fees.Fees( state.fees );
 
     let nonce_factory = Nonce.Nonce( state.nonce );

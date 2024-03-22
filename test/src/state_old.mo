@@ -11,7 +11,7 @@ module {
   public type State = {
     manager_state : ECDSA.Manager.State;
     client_state : Client.State;
-    agent_state : Agent.State;
+    agent_state : Agent.State; 
   };
 
   public func init(): State {

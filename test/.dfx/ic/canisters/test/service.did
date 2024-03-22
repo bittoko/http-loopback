@@ -1,3 +1,9 @@
+type AsyncError = variant {
+  other : text;
+  fee_not_defined : text;
+  trapped : text;
+};
+type AsyncReturn = variant { ok; err : AsyncError };
 type Error = variant {
   expired;
   missing : text;
@@ -15,12 +21,12 @@ type HttpResponsePayload = record {
   headers : vec HttpHeader;
 };
 type Test = service {
-  generate_new_identity : () -> (opt record { nat; vec text });
   get_principal : (nat) -> (principal);
   get_public_key : (nat) -> (vec nat8) query;
   hello : (text) -> (text);
-  loopback : (nat, text) -> (variant { ok : opt text; err : Error });
-  sign_message : (nat) -> (opt vec nat8);
+  init : () -> (AsyncReturn);
+  loopback : (text) -> (variant { ok : opt text; err : Error });
+  sign_message : (text) -> (opt vec nat8);
   transform : (TransformArgs) -> (HttpResponsePayload) query;
 };
 type TransformArgs = record {

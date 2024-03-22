@@ -6,15 +6,18 @@ import { Nonce } "mo:utilities";
 import Time "mo:base/Time";
 import { abs } "mo:base/Int";
 import Cbor "../Cbor";
+import State "state";
 import T "types";
 
 module {
 
   type Attempts = { var count : Nat };
 
-  public class Agent(state: T.State, client : T.Client, identity: T.Identity) = {
+  public class Agent(state_: T.State, client : T.Client, identity: T.Identity) = {
 
-    let nonce_factory = Nonce.Nonce( state.agent_nonce );
+    let state = State.unwrap( state_ );
+
+    let nonce_factory = Nonce.Nonce( state.nonce );
 
     public func query_method(req: T.CallRequest) : async* T.Response {
       switch( await* sign_and_send(#query_method(req), null) ){
@@ -41,7 +44,7 @@ module {
             case _ ()
           };
           var attempts : Nat = 0;
-          let expiration : Int = Time.now() + state.agent_ingress_expiry;
+          let expiration : Int = Time.now() + state.ingress_expiry;
           while true {
             attempts += 1;
             if ( Time.now() >= expiration ) return #err(#expired);
@@ -84,7 +87,7 @@ module {
           identity, 
           {
             sender = Principal.toBlob( identity.get_principal() );
-            ingress_expiry = abs(Time.now()) + state.agent_ingress_expiry;
+            ingress_expiry = abs(Time.now()) + state.ingress_expiry;
             nonce = ?nonce_factory.next_blob();
             request = rtype;
           }
