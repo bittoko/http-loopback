@@ -25,18 +25,26 @@ type Error =
    rejected: text;
    trapped: text;
  };
+type AsyncReturn = 
+ variant {
+   err: AsyncError;
+   ok;
+ };
+type AsyncError = 
+ variant {
+   fee_not_defined: text;
+   other: text;
+   trapped: text;
+ };
 service : {
-  generate_new_identity: () -> (opt record {
-                                      nat;
-                                      vec text;
-                                    });
   get_principal: (nat) -> (principal);
   get_public_key: (nat) -> (vec nat8) query;
   hello: (text) -> (text);
-  loopback: (nat, text) -> (variant {
-                              err: Error;
-                              ok: opt text;
-                            });
-  sign_message: (nat) -> (opt blob);
+  init: () -> (AsyncReturn);
+  loopback: (text) -> (variant {
+                         err: Error;
+                         ok: opt text;
+                       });
+  sign_message: (text) -> (opt blob);
   transform: (TransformArgs) -> (HttpResponsePayload) query;
 }

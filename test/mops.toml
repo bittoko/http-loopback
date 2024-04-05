@@ -1,6 +1,6 @@
 [dependencies]
 base = "0.11.1"
-utilities = "2.0.0"
+utilities = "2.0.2"
 sha2 = "0.0.5"
 stable-buffer = "1.0.1"
 tecdsa = "0.0.4"

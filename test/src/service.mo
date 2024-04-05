@@ -10,7 +10,7 @@ module {
       switch(
         await* agent.update_method(
           {
-            max_response_bytes = null;
+            max_response_bytes = ?1_000_000;
             canister_id = canister_id;
             method_name = "hello";
             arg = to_candid( t );

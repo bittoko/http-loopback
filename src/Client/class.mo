@@ -50,7 +50,7 @@ module {
       let #ok(base_fee) = fees.get(C.FEES.ID.PER_CALL) else { return #err(#fee_not_defined(C.FEES.ID.PER_CALL)) };
       let #ok(request_fee) = fees.multiply(C.FEES.ID.PER_REQUEST_BYTE, request_bytes) else { return #err(#fee_not_defined(C.FEES.ID.PER_REQUEST_BYTE)) };
       let #ok(response_fee) = fees.multiply(C.FEES.ID.PER_RESPONSE_BYTE, max_response) else { return #err(#fee_not_defined(C.FEES.ID.PER_RESPONSE_BYTE)) };
-      #ok(base_fee + request_fee + response_fee + 600_000)
+      #ok(base_fee + request_fee + response_fee + 850_600)
     };
   
     func canister_endpoint(request: T.Request, request_id: Blob, endpoint: Text): async* T.Response {

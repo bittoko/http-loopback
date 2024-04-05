@@ -1,48 +1,49 @@
 // Version: 1.0.0
-type Fee = Nat64;
 type Map<K, V> = [var ?([var ?K], [var ?V], [var Nat], [var Nat32])];
-type Region__1 = Region;
-type Region__2 = Region__1;
-type Region__3 = Region__2;
-type State = {var fees : Map<Text, Fee>};
-type State__1 = State;
-type State__10 = {buffer_state : State__9; client_state : State__5};
-type State__11 = State__10;
-type State__12 =
-  {
-    var agent_ingress_expiry : Nat;
-    var agent_nonce : State__3;
-    var agent_read_attempts : Nat
-  };
-type State__13 =
+type State__10 = State__9;
+type State__11 =
+  {var ingress_expiry : Nat; var nonce : State__10; var read_attempts : Nat};
+type State__13 = {var version : Version__5};
+type State__14 =
   {
     var domain : Text;
-    var fees : State__1;
-    var nonce : State__3;
+    var fees : State__8;
+    var nonce : State__10;
     var path : Text
   };
-type State__14 = State__13;
-type State__15 = State__12;
-type State__16 = State__15;
-type State__2 = {var nonce : Nat};
-type State__3 = State__2;
-type State__4 = {var client_canister_id : Text; var client_fees : State__1};
-type State__5 = State__4;
-type State__8 =
-  {
-    block_size : Nat64;
-    blocks : Region__3;
-    blocks_per_page : Nat64;
-    var capacity : Nat64;
-    var next : Nat64;
-    page_buffer : Nat64
-  };
-type State__9 = State__8;
+type State__16 = {var version : Version__7};
+type State__17 = State__16;
+type State__18 = {var canister_id : Text; var fees : State__8};
+type State__20 = {var version : Version__9};
+type State__21 = State__20;
+type State__22 = Blob;
+type State__24 = {var version : Version__11};
+type State__25 = State__24;
+type State__26 = State__13;
+type State__27 = State__26;
+type State__5 = {var fees : Map<Text, Nat64>};
+type State__7 = {var version : Version__3};
+type State__8 = State__7;
+type State__9 = {var nonce : Nat};
+type Version__10 = {#null_; #v0 : State__22};
+type Version__11 = Version__10;
+type Version__2 = {#null_; #v0 : State__5};
+type Version__3 = Version__2;
+type Version__4 = {#null_; #v0 : State__11};
+type Version__5 = Version__4;
+type Version__6 = {#null_; #v0 : State__14};
+type Version__7 = Version__6;
+type Version__8 = {#null_; #v0 : State__18};
+type Version__9 = Version__8;
 actor {
   stable state :
     {
-      agent_state : State__16;
-      client_state : State__14;
-      manager_state : State__11
+      var ecdsa_client : State__21;
+      var ecdsa_identity : State__25;
+      var fees : State__8;
+      var initialized : Bool;
+      var loopback_agent : State__27;
+      var loopback_client : State__17;
+      var self_id : Text
     }
 };
